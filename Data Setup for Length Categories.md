@@ -1,5 +1,4 @@
-# Fishery-Statistics
-# R
+# Fishery-Statistics R
 #Data Setup for Gabelhouse Length Categories 
 
 DataManipInchLake<- read.csv('C:/Users/ekwityn/Desktop/InchLake2.csv',header=TRUE, blank.lines.skip = TRUE,na.strings = "NA",stringsAsFactors=FALSE); 
