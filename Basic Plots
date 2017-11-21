@@ -1,0 +1,95 @@
+DataManipInchLake<- read.csv('C:/Users/ekwityn/Desktop/InchLake2.csv',header=TRUE, blank.lines.skip = TRUE,na.strings = "NA",stringsAsFactors=FALSE); 
+data(DataManipInchLake)
+str(DataManipInchLake)
+
+levels(DataManipInchLake$species)   #Determines the different species in the dataframe
+
+
+library(dplyr)     
+library(FSA)      
+library(FSAdata)  
+#https://rpubs.com/dogle/32746
+
+
+
+DataManipInchLake$length_cm<-DataManipInchLake$length*2.54  #Creation of new variables; new column for fish length in mm
+DataManipInchLake$length_mm<-DataManipInchLake$length*25.4  #Creation of new variables; new column for fish length in mm
+DataManipInchLake$gcat<-psdAdd(DataManipInchLake$length_cm, DataManipInchLake$species) #('Stock', 'Quality', 'Preferred', 'Memorable','Trophy')
+
+
+NewInchLake<-data.frame(DataManipInchLake$year, DataManipInchLake$species, DataManipInchLake$length, 
+                        DataManipInchLake$length_cm, DataManipInchLake$length_mm, DataManipInchLake$weight)   #Creation of new dataframe
+names(NewInchLake)<-c("year", "species", "tl_inch", "tl_cm","tl_mm", "wt_g") #New datadrame output with new header names; length=lt and weight=wt
+
+
+NewInchLake<-mutate(NewInchLake, gcat=psdAdd(tl_mm,species)) #Determining Gabelhouse length categories all species output indicates substock, stock, quality, preferred, memorable, and trophy
+NewInchLake<-mutate(NewInchLake, gcatv=psdAdd(tl_mm,species,use.names = FALSE)) # #Determining Gabelhouse length categories all species output indicates substock, stock, quality, preferred, memorable, and trophy; , units="English" indicates measurement, do not include if using metric, formula generally assumes (mm,g) 
+NewInchLake<-mutate(NewInchLake, Wr=wrAdd(wt_g,tl_mm,species)) #Determining Gabelhouse length categories all species output indicates substock, stock, quality, preferred, memorable, and trophy
+NewInchLake[seq(1,501,50),] #Examines every 50th row of your data; used as a check 
+
+
+bg.il<-subset(NewInchLake, species=="Bluegill")          #output contains only Bluegill for 2007 & 2008, and also removed NedID and fishID, Also relabeled length to length_inch
+bg.il07<-subset(NewInchLake, year=="2007")
+bg.il08<-subset(NewInchLake, year=="2008")
+
+lmb.il<-subset(NewInchLake, species=="Largemouth Bass")  #output contains only Largemouth Bass for 2007 & 2008, and also removed NedID and fishID, Also relabeled length to length_inch
+
+
+nongame.il<-subset(NewInchLake, species %in% c("Bluntnose Minnow", "Fathead Minnow", "Iowa Darter", "Tadpole Madtom"))  #subsetting dataframe by nongame fish species for 2007 & 2008
+nongame.il$species  #Indicates the proper output
+nongame.il[order(nongame.il[,1],nongame.il[,2], nongame.il[,3]),] #Sorting data by species alp and also speices length within year ; https://chartio.com/resources/tutorials/how-to-sort-a-data-frame-by-multiple-columns-in-r/
+
+
+NewInchPSD <- NewInchLake %>%
+  filter(gcat!="zero") %>%
+  mutate(gcat=droplevels(gcat)) %>%
+  filter(!is.na(gcat))   %>%
+  mutate(species=droplevels(species)) #Drops species that are not in the Gabelhouse length catergory list
+
+  
+freq <- xtabs(~species+gcat,data=NewInchPSD)
+iPSDs <- prop.table(freq,margin=1)*100
+round(iPSDs,1)
+
+
+PSDs <- t(apply(iPSDs,MARGIN=1,FUN=rcumsum))
+round(PSDs,1)
+
+Summarize(Wr~species,data=NewInchLake,digits=1)
+
+Summarize(Wr~gcat*species,data=NewInchLake,digits=1)
+
+
+#############################################
+########Plotting Bluegill Population Dynamics
+#############################################
+
+#Distribution of Length mm
+plot(bg.il$tl_mm,ylim=c(0,500),xlim=c(0,500),
+     ylab="Count",xlab="Fork Length (mm)",pch=19)
+
+#Distribution of Weight (g)
+plot(bg.il$wt_g,ylim=c(0,500),xlim=c(0,500),
+     ylab="Count",xlab="Weight (g)",pch=19)
+
+##Distribtuion of length and weight
+plot(tl_mm~wt_g,data=bg.il,ylim=c(0,500),xlim=c(0,500),
+     ylab="Weight (g)",xlab="Fork Length (mm)",pch=19)
+
+##Distribution of length by year 2007 and 2008
+clr <- c("black","gray50")
+plot(ecdf(bg.il07$tl_mm),xlab="Total Length (mm)",
+     do.points=FALSE,verticals=TRUE,main="",col.01line=NULL)
+plot(ecdf(bg.il08$tl_mm),add=TRUE,do.points=FALSE,
+     verticals=TRUE,col=clr[2],col.01line=NULL)
+legend("bottomright",c("2007","2008"),col=clr,lty=1,
+       bty="n",cex=0.75)
+
+
+##Relationship between log length and log weight
+plot(log(tl_mm)~log(wt_g),data=bg.il,ylim=c(0,10),xlim=c(0,10),
+     ylab="Weight (g)",xlab="Fork Length (mm)",pch=19)
+
+#The relationship between the natural logs of weight and length separately for each year (using only one plot).
+
+#The difference in mean lengths between the two years (plot should include confidence intervals).
