@@ -71,3 +71,4 @@ Summarize(Wr~species,data=NewInchLake,digits=1)
 
 Summarize(Wr~gcat*species,data=NewInchLake,digits=1)
 
+
