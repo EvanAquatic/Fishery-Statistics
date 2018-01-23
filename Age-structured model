@@ -1,0 +1,29 @@
+#Age-structured model 
+
+NYears=100
+S=c(0.1,0.3,0.5,0.6,0.7,0.7,0.7,0.7) #only one in 10,000 individuals survive from egg to year one
+N=matrix(data=NA,nrow=NYears,ncol=9)
+
+N[1,]=c(1000,S[1]*1000,S[1]*S[2]*1000,S[1]*S[2]*S[3]*1000,S[1]*S[2]*S[3]*S[4]*1000,
+        S[1]*S[2]*S[3]*S[4]*S[5]*1000,S[1]*S[2]*S[3]*S[4]*S[5]*S[6]*1000,
+        S[1]*S[2]*S[3]*S[4]*S[5]*S[6]*S[7]*1000,S[1]*S[2]*S[3]*S[4]*S[5]*S[6]*S[7]*S[8]*1000)
+  #1000,100,30,15,9,6.3,4.41,3.087,2.1609
+
+f=c(0,0,243,1024,3125,7776,16807,32768)
+ES=0.0001 #number of eggs surviving to year one 
+
+fun<-function(x) ES*sum(N[t,3:8]*f[3:8]
+fun2<-function(y) S[a]*N[t,a]
+
+for (t in 1:99)
+  { for (a in 1:8)
+    { 
+      x<-fun(x)
+      #4.912149e-20
+      y<-fun2(y)
+      #6.276006e-21
+    } 
+  } 
+
+matplot(log(N),type="l")
+  
