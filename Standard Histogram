@@ -12,12 +12,8 @@ barfill <- "#4271AE"
 barlines <- "#1F3552"
 
 p7 <- ggplot(Smallmouth, aes(x = Length_inches)) +
-  geom_histogram(aes(y = ..count..), binwidth = .5,
-                 colour = barlines, fill = barfill) +
-  scale_x_continuous(name = "Length (inches)",
-                     expand=c(0,0),
-                     breaks = seq(0, 25, 1),
-                     limits=c(0, 22)) +
+  geom_histogram(aes(y = ..count..), binwidth = .5,colour = barlines, fill = barfill) +
+  scale_x_continuous(name = "Length (inches)",expand=c(0,0),breaks = seq(0, 25, 1),limits=c(0, 22)) +
   scale_y_continuous(name = "Count", expand=c(0,0), limits=c(0, 8), breaks= seq(0,8,1)) +
   ggtitle("Smallmouth Bass Histogram of Length 2016") +
   theme_bw() +
